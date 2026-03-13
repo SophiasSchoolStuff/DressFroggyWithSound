@@ -62,7 +62,7 @@
       #character {
         position: absolute;
         left: 50%;
-        top: 50%;
+        top: 70%;
         transform: translate(-50%, -48%);
         width: 160px;
 
@@ -95,6 +95,18 @@
 
       .speechbubble-off {
         transform: translateX(-100px) translateY(-390px);
+        pointer-events: auto;
+        cursor: pointer;
+      }
+
+      .speaker1 {
+        transform: scale(0.3) translateX(-300px) translateY(-2200px);
+        pointer-events: auto;
+        cursor: pointer;
+      }
+
+      .speaker2 {
+        transform: scale(0.3) translateX(350px) translateY(-2630px);
         pointer-events: auto;
         cursor: pointer;
       }
@@ -216,6 +228,16 @@
           src="resources/pictures/speechbubble2.png"
           onclick="playSound1()"
         />
+        <img
+          class="speaker1"
+          src="resources/pictures/Speaker_Icon.svg"
+          onclick="playSound2()"
+        />
+        <img
+          class="speaker2"
+          src="resources/pictures/Speaker_Icon.svg"
+          onclick="playSound1()"
+        />
       </div>
     </div>
 
@@ -269,7 +291,7 @@
           width: 57,
           height: 62,
           img: "resources/pictures/boot1.png",
-          name: "boots",
+          name: "boot",
           scale: 1.4,
           rotation: 0,
         },
@@ -296,7 +318,7 @@
           width: 61,
           height: 73,
           img: "resources/pictures/mitten1.png",
-          name: "mittens",
+          name: "mitten",
           scale: 0.8,
           rotation: 0,
         },
@@ -323,7 +345,7 @@
           width: 64,
           height: 64,
           img: "resources/pictures/sock1.png",
-          name: "socks",
+          name: "sock",
           scale: 1,
           rotation: 0,
         },
