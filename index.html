@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dress Up!</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        user-select: none;
+      }
+
+      body {
+        font-family: "Baloo 2", cursive;
+        background: #fff9f0;
+        min-height: 100vh;
+        overflow: hidden;
+      }
+
+      /* Dotted background pattern */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: radial-gradient(#f0c080 1.5px, transparent 1.5px);
+        background-size: 28px 28px;
+        opacity: 0.4;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      h1 {
+        position: fixed;
+        top: 18px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 2rem;
+        font-weight: 800;
+        color: #c04f1a;
+        letter-spacing: 1px;
+        z-index: 10;
+        text-shadow: 2px 2px 0 #f9d090;
+        white-space: nowrap;
+      }
+
+      #scene {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        z-index: 1;
+      }
+
+      /* ── Character ── */
+      #character {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -48%);
+        width: 160px;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        pointer-events: none;
+      }
+
+      #character img {
+        width: 100%;
+        display: block;
+        margin-top: -32px;
+      }
+
+      .char-head {
+        transform: scale(0.75) translateY(12px) translateX(5px);
+      }
+
+      .char-feet {
+        transform: translateX(10px);
+      }
+
+      .speechbubble-on {
+        transform: translateX(100px) translateY(-470px);
+        pointer-events: auto;
+        cursor: pointer;
+      }
+
+      .speechbubble-off {
+        transform: translateX(-100px) translateY(-390px);
+        pointer-events: auto;
+        cursor: pointer;
+      }
+
+      /* ── Wardrobe panel ── */
+      #wardrobe {
+        position: fixed;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 115px;
+        background: #fff3e0;
+        border: 3px solid #f4a94e;
+        border-left: none;
+        border-radius: 0 20px 20px 0;
+        padding: 14px 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 5;
+        box-shadow: 4px 4px 0 #f4a94e;
+      }
+
+      #wardrobe h2 {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: #c04f1a;
+        text-align: center;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+      }
+
+      /* ── Draggable clothing items ── */
+      .clothing-item {
+        position: fixed;
+        cursor: grab;
+        touch-action: none;
+        z-index: 20;
+        transition:
+          filter 0.15s,
+          transform 0.1s;
+        -webkit-user-drag: none;
+      }
+
+      .clothing-item:active {
+        cursor: grabbing;
+      }
+      .clothing-item.dragging {
+        filter: drop-shadow(4px 6px 8px rgba(0, 0, 0, 0.3));
+        transform: scale(1.08);
+        z-index: 100;
+      }
+
+      .clothing-item svg {
+        display: block;
+        pointer-events: none;
+      }
+
+      /* ── Reset button ── */
+      #reset-btn {
+        position: fixed;
+        bottom: 24px;
+        right: 28px;
+        background: #c04f1a;
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-family: "Baloo 2", cursive;
+        font-size: 1rem;
+        font-weight: 700;
+        padding: 10px 22px;
+        cursor: pointer;
+        box-shadow: 3px 3px 0 #7a2f0a;
+        transition:
+          transform 0.1s,
+          box-shadow 0.1s;
+        z-index: 10;
+      }
+      #reset-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 3px 5px 0 #7a2f0a;
+      }
+      #reset-btn:active {
+        transform: translateY(1px);
+        box-shadow: 1px 1px 0 #7a2f0a;
+      }
+
+      /* Thumb previews in the wardrobe panel */
+      .thumb {
+        cursor: grab;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        opacity: 0.85;
+      }
+      .thumb span {
+        font-size: 0.65rem;
+        color: #c04f1a;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>👗 Dress Me Up!</h1>
+
+    <div id="scene">
+      <div id="character">
+        <img class="char-head" src="resources/pictures/froggyHead.png" />
+        <img class="char-body" src="resources/pictures/froggyUpperbody.png" />
+        <img class="char-feet" src="resources/pictures/froggyFeet.png" />
+        <img
+          class="speechbubble-off"
+          src="resources/pictures/speechbubble1.png"
+          onclick="playSound2()"
+        />
+        <img
+          class="speechbubble-on"
+          src="resources/pictures/speechbubble2.png"
+          onclick="playSound1()"
+        />
+      </div>
+    </div>
+
+    <!-- Wardrobe Panel (labels only, real items float) -->
+    <div id="wardrobe">
+      <h2>👚 Wardrobe</h2>
+    </div>
+
+    <button id="reset-btn">↺ Reset</button>
+
+    <script>
+      const ITEMS = [
+        {
+          id: "hat",
+          width: 68,
+          height: 44,
+          img: "resources/pictures/hat.png",
+          name: "hat",
+          scale: 2,
+          rotation: 0,
+        },
+        {
+          id: "tshirt",
+          width: 104,
+          height: 80,
+          img: "resources/pictures/tshirt.png",
+          name: "T-shirt",
+          scale: 1,
+          rotation: 0,
+        },
+        {
+          id: "trousers",
+          width: 77,
+          height: 89,
+          img: "resources/pictures/trousers.png",
+          name: "trousers",
+          scale: 1,
+          rotation: 0,
+        },
+        {
+          id: "scarf",
+          width: 70,
+          height: 100,
+          img: "resources/pictures/scarf.png",
+          name: "scarf",
+          scale: 1,
+          rotation: 0,
+        },
+        {
+          id: "boot1",
+          width: 57,
+          height: 62,
+          img: "resources/pictures/boot1.png",
+          name: "boot",
+          scale: 1.4,
+          rotation: 0,
+        },
+        {
+          id: "boot2",
+          width: 56,
+          height: 55,
+          img: "resources/pictures/boot2.png",
+          name: "boot",
+          scale: 1.4,
+          rotation: 0,
+        },
+        {
+          id: "coat",
+          width: 60,
+          height: 45,
+          img: "resources/pictures/coat.png",
+          name: "coat",
+          scale: 2.1,
+          rotation: 0,
+        },
+        {
+          id: "mitten1",
+          width: 61,
+          height: 73,
+          img: "resources/pictures/mitten1.png",
+          name: "mitten",
+          scale: 0.8,
+          rotation: 0,
+        },
+        {
+          id: "mitten2",
+          width: 61,
+          height: 71,
+          img: "resources/pictures/mitten2.png",
+          name: "mitten",
+          scale: 0.8,
+          rotation: 0,
+        },
+        {
+          id: "pullover",
+          width: 54,
+          height: 43,
+          img: "resources/pictures/pullover.png",
+          name: "pullover",
+          scale: 2.5,
+          rotation: 0,
+        },
+        {
+          id: "sock1",
+          width: 64,
+          height: 64,
+          img: "resources/pictures/sock1.png",
+          name: "sock",
+          scale: 1,
+          rotation: 0,
+        },
+        {
+          id: "sock2",
+          width: 65,
+          height: 72,
+          img: "resources/pictures/sock2.png",
+          name: "sock",
+          scale: 1,
+          rotation: 0,
+        },
+        {
+          id: "underwear",
+          width: 102,
+          height: 153,
+          img: "resources/pictures/underwear.png",
+          name: "underwear",
+          scale: 0.7,
+          rotation: 0,
+        },
+      ];
+
+      // Starting positions (in the wardrobe area or right side)
+      const START_POSITIONS = {
+        hat: { x: 170, y: 80 },
+        tshirt: { x: 170, y: 180 },
+        trousers: { x: 170, y: 310 },
+        scarf: { x: 170, y: 410 },
+        boot1: { x: 170, y: 550 },
+        boot2: { x: 170, y: 650 },
+        coat: { x: 170, y: 750 },
+        mitten1: { x: 330, y: 50 },
+        mitten2: { x: 330, y: 150 },
+        pullover: { x: 330, y: 250 },
+        sock1: { x: 330, y: 350 },
+        sock2: { x: 330, y: 450 },
+        underwear: { x: 330, y: 550 },
+      };
+
+      const elements = {};
+
+      function createItems() {
+        ITEMS.forEach((item) => {
+          const el = document.createElement("div");
+          el.className = "clothing-item";
+          el.id = "item-" + item.id;
+          const img = document.createElement("img");
+          img.src = item.img;
+          img.draggable = false;
+          img.style.width = "100%";
+          img.style.height = "100%";
+
+          el.appendChild(img);
+          el.style.width = item.width + "px";
+          el.style.height = item.height + "px";
+
+          // Apply optional scale and rotation
+          const scale = item.scale ?? 1;
+          const rotation = item.rotation ?? 0;
+
+          /*
+    You can tweak clothing alignment here.
+    Example:
+    scale: 1.2
+    rotation: -10
+    */
+          el.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
+
+          const pos = START_POSITIONS[item.id];
+          el.style.left = pos.x + "px";
+          el.style.top = pos.y + "px";
+
+          document.body.appendChild(el);
+          elements[item.id] = { el, startX: pos.x, startY: pos.y };
+
+          makeDraggable(el);
+        });
+      }
+
+      function makeDraggable(el) {
+        let offsetX,
+          offsetY,
+          isDragging = false;
+
+        // Mouse
+        el.addEventListener("mousedown", startDrag);
+        // Touch
+        el.addEventListener("touchstart", startDrag, { passive: false });
+
+        function startDrag(e) {
+          e.preventDefault();
+          isDragging = true;
+          el.classList.add("dragging");
+
+          const rect = el.getBoundingClientRect();
+          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+          const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+          offsetX = clientX - rect.left;
+          offsetY = clientY - rect.top;
+
+          // Bring to front
+          document
+            .querySelectorAll(".clothing-item")
+            .forEach((i) => (i.style.zIndex = 20));
+          el.style.zIndex = 100;
+
+          const onMove = (e2) => {
+            if (!isDragging) return;
+            const cx = e2.touches ? e2.touches[0].clientX : e2.clientX;
+            const cy = e2.touches ? e2.touches[0].clientY : e2.clientY;
+            el.style.left = cx - offsetX + "px";
+            el.style.top = cy - offsetY + "px";
+          };
+
+          const onEnd = () => {
+            isDragging = false;
+            el.classList.remove("dragging");
+            document.removeEventListener("mousemove", onMove);
+            document.removeEventListener("mouseup", onEnd);
+            document.removeEventListener("touchmove", onMove);
+            document.removeEventListener("touchend", onEnd);
+          };
+
+          document.addEventListener("mousemove", onMove);
+          document.addEventListener("mouseup", onEnd);
+          document.addEventListener("touchmove", onMove, { passive: false });
+          document.addEventListener("touchend", onEnd);
+        }
+      }
+
+      function resetAll() {
+        ITEMS.forEach((item) => {
+          const info = elements[item.id];
+          if (info) {
+            info.el.style.transition =
+              "left 0.4s cubic-bezier(.34,1.56,.64,1), top 0.4s cubic-bezier(.34,1.56,.64,1)";
+            info.el.style.left = info.startX + "px";
+            info.el.style.top = info.startY + "px";
+            setTimeout(() => {
+              info.el.style.transition = "";
+            }, 500);
+          }
+        });
+      }
+
+      function populateWardrobe() {
+        const wardrobe = document.getElementById("wardrobe");
+
+        ITEMS.forEach((item) => {
+          if (!item.id.includes("2")) {
+            const thumb = document.createElement("div");
+            thumb.className = "thumb";
+
+            const img = document.createElement("img");
+            img.src = item.img;
+            img.style.width = "50px";
+
+            const label = document.createElement("span");
+            label.textContent = item.name;
+
+            thumb.appendChild(img);
+            thumb.appendChild(label);
+
+            wardrobe.appendChild(thumb);
+          }
+        });
+      }
+
+      function playSound1() {
+        var audio = new Audio("resources/sounds/Froggy-puts-on-his.mp3");
+        audio.play();
+      }
+
+      function playSound2() {
+        var audio = new Audio("resources/sounds/Froggy-takes-off-his.mp3");
+        audio.play();
+      }
+
+      populateWardrobe();
+      createItems();
+      document.getElementById("reset-btn").addEventListener("click", resetAll);
+    </script>
+  </body>
+</html>
