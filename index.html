@@ -241,11 +241,6 @@
       </div>
     </div>
 
-    <!-- Wardrobe Panel (labels only, real items float) -->
-    <div id="wardrobe">
-      <h2>👚 Wardrobe</h2>
-    </div>
-
     <button id="reset-btn">↺ Reset</button>
 
     <script>
@@ -492,29 +487,6 @@
         });
       }
 
-      function populateWardrobe() {
-        const wardrobe = document.getElementById("wardrobe");
-
-        ITEMS.forEach((item) => {
-          if (!item.id.includes("2")) {
-            const thumb = document.createElement("div");
-            thumb.className = "thumb";
-
-            const img = document.createElement("img");
-            img.src = item.img;
-            img.style.width = "50px";
-
-            const label = document.createElement("span");
-            label.textContent = item.name;
-
-            thumb.appendChild(img);
-            thumb.appendChild(label);
-
-            wardrobe.appendChild(thumb);
-          }
-        });
-      }
-
       function playSound1() {
         var audio = new Audio("resources/sounds/Froggy-puts-on-his.mp3");
         audio.play();
@@ -525,7 +497,6 @@
         audio.play();
       }
 
-      populateWardrobe();
       createItems();
       document.getElementById("reset-btn").addEventListener("click", resetAll);
     </script>
